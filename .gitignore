@@ -1,0 +1,12 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# Claude local dev config (preview server etc.)
+.claude/
+
+# Local server output
+*.log

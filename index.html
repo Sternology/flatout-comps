@@ -1,0 +1,1385 @@
+<!doctype html>
+<!--
+  Flat Out Competitions — homepage mockup
+  ----------------------------------------
+  Single-file, self-contained, static. All assets in ./img/.
+  Tailwind via Play CDN (NOT production-ready — pin and build for prod).
+  Lucide icons via CDN. Fonts via Google Fonts.
+
+  Notes on intentional decisions where the brief was ambiguous:
+  - Card progress indicators use BOTH the mini tachometer (per §7.3 of the
+    wrapper prompt) AND a horizontal redline scale beneath (per §7.6 of the
+    Plan). Both reinforce the dial motif; the bar makes the proportion
+    readable at small sizes.
+  - Tachometer ticks: minor ticks every 10%, with labels rendered at the
+    five quarter positions 0 / 25 / 50 / 75 / 100 (per the Plan).
+  - Logo PNG has a baked-in black backdrop; handled with mix-blend-mode:
+    lighten over an --ink (#0B0B0B) backdrop, with #000 immediately around
+    the mark as the belt-and-braces fallback.
+-->
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0B0B0B" />
+  <title>Flat Out Competitions — Win Like You Live. Flat Out.</title>
+  <meta name="description" content="The UK comp site built by petrolheads. Win cars, cash, watches and filmmaking gear from £1. Free postal entry on every competition. Backed by Flat-Out Media." />
+  <meta property="og:title" content="Flat Out Competitions — Win Like You Live. Flat Out." />
+  <meta property="og:description" content="UK car & lifestyle competitions from £1. Live draws every Friday. Free postal entry. Backed by Flat-Out Media." />
+  <meta property="og:type" content="website" />
+
+  <link rel="preload" as="image" href="img/hero-r34.png" fetchpriority="high" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#0B0B0B', carbon: '#161616', steel: '#222428',
+            bone: '#F5F2EC', mute: '#9CA0A6',
+            flame: '#F26A1F', 'flame-2': '#FF8A3C',
+            ember: '#B83E0E', redline: '#E33A28', check: '#3FB964',
+          },
+          fontFamily: {
+            display: ['Anton', 'Impact', 'system-ui', 'sans-serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          },
+          boxShadow: {
+            'cta': '0 8px 20px -8px rgba(242,106,31,.6), inset 0 1px 0 rgba(255,255,255,.18)',
+            'card': '0 1px 0 rgba(255,255,255,.04) inset, 0 16px 40px -20px rgba(0,0,0,.7)',
+            'glow': '0 0 0 1px rgba(242,106,31,.35), 0 12px 28px -10px rgba(242,106,31,.35)',
+          },
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root{
+      --ink:#0B0B0B; --carbon:#161616; --steel:#222428; --steel-2:#2c2f34;
+      --bone:#F5F2EC; --mute:#9CA0A6;
+      --flame:#F26A1F; --flame-2:#FF8A3C; --ember:#B83E0E;
+      --redline:#E33A28; --check:#3FB964;
+    }
+    html,body{background:var(--ink); color:var(--bone);}
+    body{font-family:'Inter',system-ui,sans-serif; font-feature-settings:"ss01","cv11"; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;}
+    .font-display{font-family:'Anton',Impact,system-ui,sans-serif; letter-spacing:-0.005em; line-height:1.02;}
+    .font-mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+
+    /* Subtle film-grain over the page */
+    body::before{content:""; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.035; mix-blend-mode:overlay;
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");}
+
+    /* Focus rings — visible on keyboard nav */
+    *:focus-visible{outline:2px solid var(--flame); outline-offset:2px; border-radius:2px;}
+
+    /* Logo handling — mix-blend-mode strips the baked-in black backdrop */
+    .logo-img{mix-blend-mode:lighten;}
+
+    /* Live pulsing dot */
+    .pulse-dot{display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--redline); box-shadow:0 0 0 0 rgba(227,58,40,.7); animation:pulse 1.5s ease-out infinite;}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(227,58,40,.7)}70%{box-shadow:0 0 0 10px rgba(227,58,40,0)}100%{box-shadow:0 0 0 0 rgba(227,58,40,0)}}
+
+    /* Marquee */
+    .marquee{display:flex; overflow:hidden; mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);}
+    .marquee-track{display:flex; gap:3rem; white-space:nowrap; animation:scroll 38s linear infinite;}
+    .marquee:hover .marquee-track{animation-play-state:paused;}
+    @keyframes scroll{from{transform:translateX(0)} to{transform:translateX(-50%)}}
+
+    /* Sticky nav transition */
+    .nav-sticky{transition:background-color .2s, backdrop-filter .2s, border-bottom-width .2s;}
+    .nav-sticky.scrolled{background:rgba(0,0,0,.92); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom-width:2px;}
+
+    /* CTA — Anton, depth, shimmer sweep */
+    .cta{display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:0 1.6rem; height:56px; min-width:160px; font-family:'Anton',Impact,sans-serif; letter-spacing:.04em; font-size:1.125rem; color:#fff; background:linear-gradient(180deg,var(--flame-2) 0%, var(--flame) 60%, var(--ember) 100%); border:1px solid rgba(255,255,255,.08); border-radius:6px; position:relative; overflow:hidden; box-shadow:0 8px 20px -8px rgba(242,106,31,.6), inset 0 1px 0 rgba(255,255,255,.22), inset 0 -1px 0 rgba(0,0,0,.25); transition:transform .15s, box-shadow .2s; cursor:pointer;}
+    .cta:hover{transform:translateY(-1px); box-shadow:0 12px 28px -10px rgba(242,106,31,.7), inset 0 1px 0 rgba(255,255,255,.25), inset 0 -1px 0 rgba(0,0,0,.25);}
+    .cta:active{transform:translateY(0);}
+    .cta::after{content:""; position:absolute; top:0; left:-30%; width:30%; height:100%; background:linear-gradient(115deg,transparent 0%, rgba(255,255,255,.18) 50%, transparent 100%); transform:skewX(-18deg); animation:shimmer 2.6s ease-in-out infinite;}
+    .cta.no-loop::after{animation:none;}
+    .cta.no-loop:hover::after{animation:shimmer 1.5s ease-out 1;}
+    @keyframes shimmer{0%{left:-30%} 60%{left:130%} 100%{left:130%}}
+
+    .cta-outline{display:inline-flex; align-items:center; justify-content:center; gap:.5rem; padding:0 1.2rem; height:44px; font-family:'Anton',Impact,sans-serif; letter-spacing:.04em; font-size:.95rem; color:var(--flame); background:transparent; border:1px solid var(--flame); border-radius:6px; transition:background .15s, color .15s, transform .15s; cursor:pointer;}
+    .cta-outline:hover{background:rgba(242,106,31,.1); transform:translateY(-1px);}
+
+    /* Card hover */
+    .card{background:var(--carbon); border:1px solid var(--steel); border-radius:10px; overflow:hidden; transition:transform .24s cubic-bezier(.2,.8,.2,1), box-shadow .24s; will-change:transform;}
+    .card:hover{transform:translateY(-3px) scale(1.01); box-shadow:0 0 0 1px rgba(242,106,31,.4), 0 18px 36px -16px rgba(242,106,31,.35);}
+
+    /* Status chip */
+    .chip{display:inline-flex; align-items:center; gap:.35rem; padding:.28rem .55rem; border-radius:4px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.66rem; letter-spacing:.06em; text-transform:uppercase;}
+    .chip-red{background:var(--redline); color:#fff;}
+    .chip-blue{background:#1f5fd6; color:#fff;}
+    .chip-flame{background:transparent; color:var(--flame); border:1px solid var(--flame);}
+
+    /* Redline progress bar — segmented rev scale */
+    .rev-bar{display:flex; gap:2px; height:8px; width:100%; padding:0; background:transparent;}
+    .rev-seg{flex:1; background:#23252a; border-radius:1px; transition:background .9s cubic-bezier(.2,.8,.2,1);}
+    .rev-bar.filled .rev-seg.on-1{background:var(--bone);}
+    .rev-bar.filled .rev-seg.on-2{background:var(--flame-2);}
+    .rev-bar.filled .rev-seg.on-3{background:var(--flame);}
+    .rev-bar.filled .rev-seg.on-4{background:var(--redline);}
+
+    /* Toast */
+    .toast{position:fixed; left:50%; bottom:24px; transform:translate(-50%,40px); background:var(--carbon); color:var(--bone); border:1px solid var(--steel); border-left:3px solid var(--flame); padding:.75rem 1rem; border-radius:6px; font-size:.875rem; box-shadow:0 16px 40px -10px rgba(0,0,0,.6); opacity:0; transition:opacity .2s, transform .2s; z-index:80; pointer-events:none;}
+    .toast.show{opacity:1; transform:translate(-50%,0);}
+
+    /* Horizontal scroll utility */
+    .hscroll{display:flex; gap:1rem; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; padding-bottom:.5rem;}
+    .hscroll > *{scroll-snap-align:start; flex:0 0 auto;}
+    .hscroll::-webkit-scrollbar{height:6px;}
+    .hscroll::-webkit-scrollbar-track{background:var(--carbon);}
+    .hscroll::-webkit-scrollbar-thumb{background:var(--steel-2); border-radius:3px;}
+
+    /* Eyebrow text */
+    .eyebrow{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.72rem; letter-spacing:.18em; color:var(--flame); text-transform:uppercase;}
+
+    /* Initials avatar */
+    .avatar{display:inline-flex; align-items:center; justify-content:center; border-radius:50%; font-family:'Anton',Impact,sans-serif; letter-spacing:.02em; color:var(--bone); border:1px solid rgba(255,255,255,.08);}
+
+    /* Hero overlay gradients */
+    .hero-overlay{background:
+      linear-gradient(90deg, rgba(11,11,11,.92) 0%, rgba(11,11,11,.65) 38%, rgba(11,11,11,.15) 70%, rgba(11,11,11,.55) 100%),
+      linear-gradient(180deg, rgba(11,11,11,.6) 0%, rgba(11,11,11,0) 30%, rgba(11,11,11,.85) 100%);}
+    @media (max-width: 767px){
+      .hero-overlay{background:
+        linear-gradient(180deg, rgba(11,11,11,.6) 0%, rgba(11,11,11,.4) 35%, rgba(11,11,11,.92) 78%);}
+    }
+
+    /* Trust pellet icon */
+    .pellet{display:flex; flex-direction:column; align-items:center; gap:.35rem; color:var(--bone);}
+    .pellet .label{font-family:'JetBrains Mono',monospace; font-weight:700; font-size:.66rem; letter-spacing:.14em; color:var(--mute);}
+
+    /* Section dividers */
+    .rule-top{border-top:1px solid var(--steel);}
+
+    /* Live-now chequer accent strip on mobile drawer */
+    .chequer{height:6px; background:repeating-linear-gradient(45deg,#fff 0 8px,#0B0B0B 8px 16px);}
+
+    /* Hide scrollbar on marquee */
+    .marquee::-webkit-scrollbar{display:none;}
+
+    /* Mobile menu */
+    .mobile-menu{transform:translateX(100%); transition:transform .25s cubic-bezier(.2,.8,.2,1);}
+    .mobile-menu.open{transform:translateX(0);}
+
+    /* Tach gauge */
+    .gauge svg{display:block;}
+    .gauge .progress-arc{transition:stroke-dasharray 1.2s cubic-bezier(.2,.8,.2,1);}
+    /* transform-box defaults to view-box on SVG elements — keep that so transform-origin maps to user-space coords */
+    .gauge .needle-grp{transition:transform 1.2s cubic-bezier(.2,.8,.2,1);}
+
+    /* Section ID anchor offset for sticky nav */
+    section[id]{scroll-margin-top:140px;}
+
+    /* Trust-strip media wordmarks */
+    .media-mark{font-family:'Anton',Impact,sans-serif; letter-spacing:.06em; color:#6b6e74; font-size:1.15rem; transition:color .2s;}
+    .media-mark:hover{color:var(--bone);}
+
+    /* Hero CTA stacking on mobile */
+    @media (max-width: 767px){
+      .hero h1{font-size:3.25rem !important;}
+      .hero .sub{font-size:1rem;}
+    }
+
+    /* Make stats numbers responsive */
+    .stat-num{font-size:clamp(2rem, 6vw, 3.25rem);}
+
+    /* "Closing today" countdown badge inside cards */
+    .closing-overlay{position:absolute; right:.6rem; bottom:.6rem; background:rgba(11,11,11,.85); border:1px solid var(--redline); padding:.4rem .6rem; border-radius:4px; font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--redline); font-size:.85rem; letter-spacing:.04em;}
+
+    /* Trustpilot mini logo (stars + word) */
+    .tp-stars svg{display:inline-block;}
+
+    /* Smooth scrolling for in-page anchors */
+    html{scroll-behavior:smooth;}
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+    }
+  </style>
+</head>
+
+<body class="bg-ink text-bone min-h-screen">
+
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-flame focus:text-white focus:px-3 focus:py-2 focus:rounded">Skip to main content</a>
+
+  <!-- ============ 7.1 UTILITY STRIP ============ -->
+  <div class="bg-black border-b border-steel text-[12px]">
+    <div class="max-w-[1280px] mx-auto px-4 h-8 flex items-center justify-between gap-4">
+      <!-- Trustpilot mini -->
+      <a href="#" data-inert class="flex items-center gap-2 shrink-0 tp-stars text-bone hover:text-flame transition-colors">
+        <svg width="76" height="14" viewBox="0 0 76 14" aria-hidden="true">
+          <g>
+            <rect x="0"  y="0" width="14" height="14" fill="#00B67A"/>
+            <rect x="15" y="0" width="14" height="14" fill="#00B67A"/>
+            <rect x="30" y="0" width="14" height="14" fill="#00B67A"/>
+            <rect x="45" y="0" width="14" height="14" fill="#00B67A"/>
+            <rect x="60" y="0" width="14" height="14" fill="#00B67A"/>
+            <polygon points="7,2 8.4,5.6 12.3,5.6 9.2,7.9 10.4,11.5 7,9.3 3.6,11.5 4.8,7.9 1.7,5.6 5.6,5.6" fill="#fff"/>
+            <polygon points="22,2 23.4,5.6 27.3,5.6 24.2,7.9 25.4,11.5 22,9.3 18.6,11.5 19.8,7.9 16.7,5.6 20.6,5.6" fill="#fff"/>
+            <polygon points="37,2 38.4,5.6 42.3,5.6 39.2,7.9 40.4,11.5 37,9.3 33.6,11.5 34.8,7.9 31.7,5.6 35.6,5.6" fill="#fff"/>
+            <polygon points="52,2 53.4,5.6 57.3,5.6 54.2,7.9 55.4,11.5 52,9.3 48.6,11.5 49.8,7.9 46.7,5.6 50.6,5.6" fill="#fff"/>
+            <polygon points="67,2 68.4,5.6 72.3,5.6 69.2,7.9 70.4,11.5 67,9.3 63.6,11.5 64.8,7.9 61.7,5.6 65.6,5.6" fill="#fff"/>
+          </g>
+        </svg>
+        <span class="font-mono font-bold">Trustpilot</span>
+        <span class="text-mute hidden sm:inline">Excellent · 1,247 reviews</span>
+      </a>
+
+      <!-- Marquee -->
+      <div class="marquee flex-1 hidden md:flex" aria-hidden="true">
+        <div class="marquee-track">
+          <span class="text-mute"><span class="text-flame">●</span> Latest winner: James M, Manchester — won £5,000 cash · 11 May</span>
+          <span class="text-mute"><span class="text-flame">●</span> Free postal entry available on every competition</span>
+          <span class="text-mute"><span class="text-flame">●</span> Live draws every Friday 7pm on YouTube</span>
+          <span class="text-mute"><span class="text-flame">●</span> Latest winner: Sophie R, Leeds — won 4× HRE wheels · 09 May</span>
+          <span class="text-mute"><span class="text-flame">●</span> 4,200+ members and counting</span>
+          <!-- duplicate for seamless loop -->
+          <span class="text-mute"><span class="text-flame">●</span> Latest winner: James M, Manchester — won £5,000 cash · 11 May</span>
+          <span class="text-mute"><span class="text-flame">●</span> Free postal entry available on every competition</span>
+          <span class="text-mute"><span class="text-flame">●</span> Live draws every Friday 7pm on YouTube</span>
+          <span class="text-mute"><span class="text-flame">●</span> Latest winner: Sophie R, Leeds — won 4× HRE wheels · 09 May</span>
+          <span class="text-mute"><span class="text-flame">●</span> 4,200+ members and counting</span>
+        </div>
+      </div>
+
+      <!-- Account / Cart -->
+      <div class="flex items-center gap-4 shrink-0">
+        <a href="#" data-inert class="hidden sm:flex items-center gap-1.5 text-bone hover:text-flame transition-colors">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i><span>Account</span>
+        </a>
+        <a href="#" data-inert class="flex items-center gap-1.5 text-bone hover:text-flame transition-colors">
+          <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i><span>Cart <span class="text-mute">(0)</span></span>
+        </a>
+        <span class="hidden sm:inline-flex items-center gap-1.5 text-mute font-mono text-[10px] tracking-widest">
+          <span class="inline-flex items-center justify-center w-4 h-4 rounded-full border border-mute font-bold">18</span><span>+</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 7.2 STICKY NAV ============ -->
+  <header class="nav-sticky sticky top-0 z-40 bg-black backdrop-blur-md border-b border-steel">
+    <div class="max-w-[1280px] mx-auto px-4 h-16 md:h-20 flex items-center justify-between gap-4">
+      <a href="#" data-inert class="shrink-0 flex items-center" aria-label="Flat Out Competitions — home">
+        <span class="bg-black inline-flex h-12 md:h-16 items-center px-1 rounded-sm">
+          <img class="logo-img h-11 md:h-14 w-auto" src="img/logo-foc.png" alt="Flat Out Competitions" width="240" height="60" />
+        </span>
+      </a>
+
+      <nav aria-label="Primary" class="hidden lg:flex items-center gap-7 text-[14px] font-medium">
+        <a href="#grid" class="hover:text-flame transition-colors">Competitions</a>
+        <a href="#grid" data-inert class="hover:text-flame transition-colors">Cars</a>
+        <a href="#grid" data-inert class="hover:text-flame transition-colors">Cash</a>
+        <a href="#grid" data-inert class="hover:text-flame transition-colors">Tech &amp; Gear</a>
+        <a href="#instant" class="hover:text-flame transition-colors">Instant Wins</a>
+        <a href="#winners" class="hover:text-flame transition-colors">Winners</a>
+        <a href="#" data-inert class="hover:text-flame transition-colors flex items-center gap-1.5">
+          <span class="pulse-dot"></span>Live Draws
+        </a>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <a href="#" data-inert class="hidden md:inline-flex text-[14px] hover:text-flame transition-colors">Sign in</a>
+        <a href="#" data-inert class="cta no-loop h-10 md:h-11 min-w-0 text-base px-5">JOIN</a>
+        <button id="menu-btn" type="button" class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded border border-steel" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile drawer -->
+  <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 h-full w-[82%] max-w-[360px] bg-ink border-l border-steel z-50 lg:hidden" aria-hidden="true">
+    <div class="chequer"></div>
+    <div class="p-5 flex items-center justify-between">
+      <span class="font-display text-xl tracking-wide">MENU</span>
+      <button id="menu-close" type="button" class="w-10 h-10 inline-flex items-center justify-center rounded border border-steel" aria-label="Close menu">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <nav class="px-5 flex flex-col gap-1 text-lg">
+      <a href="#grid" class="py-3 border-b border-steel">Competitions</a>
+      <a href="#grid" data-inert class="py-3 border-b border-steel">Cars</a>
+      <a href="#grid" data-inert class="py-3 border-b border-steel">Cash</a>
+      <a href="#grid" data-inert class="py-3 border-b border-steel">Tech &amp; Gear</a>
+      <a href="#instant" class="py-3 border-b border-steel">Instant Wins</a>
+      <a href="#winners" class="py-3 border-b border-steel">Winners</a>
+      <a href="#" data-inert class="py-3 border-b border-steel flex items-center gap-2"><span class="pulse-dot"></span>Live Draws</a>
+      <a href="#free-entry" class="py-3 border-b border-steel text-mute text-base">Free Postal Entry (Section 339)</a>
+      <a href="#" data-inert class="py-3 text-mute text-base">Sign in</a>
+    </nav>
+    <div class="px-5 mt-4">
+      <a href="#" data-inert class="cta no-loop w-full">JOIN</a>
+    </div>
+  </div>
+  <div id="menu-backdrop" class="fixed inset-0 bg-black/60 z-40 hidden lg:hidden"></div>
+
+  <main id="main">
+
+    <!-- ============ 7.3 HERO ============ -->
+    <section class="hero relative overflow-hidden" style="min-height:min(80vh,820px);">
+      <div class="absolute inset-0">
+        <img src="img/hero-r34.png" alt="Bayside Blue Nissan Skyline R34 GT-R in a darkened pit lane at night, lit by sodium-orange overhead lights" class="w-full h-full object-cover object-center" fetchpriority="high" />
+        <div class="absolute inset-0 hero-overlay"></div>
+      </div>
+
+      <div class="relative max-w-[1280px] mx-auto px-4 pt-10 md:pt-16 pb-12 md:pb-16 grid md:grid-cols-12 gap-8 items-start">
+        <!-- Left text block -->
+        <div class="md:col-span-7 lg:col-span-7 z-10">
+          <p class="eyebrow flex items-center gap-2 text-flame">
+            <span class="pulse-dot"></span><span>LIVE NOW · ENDS <span id="hero-end-label">TUESDAY 21:00</span></span>
+          </p>
+          <h1 class="hero-heading font-display uppercase mt-3 text-[3.5rem] md:text-[5rem] lg:text-[6rem] leading-[1.02]">
+            WIN THIS <span class="block">BAYSIDE BLUE</span> <span class="text-flame">R34 GT-R</span>
+          </h1>
+          <p class="sub mt-5 max-w-xl text-bone/85 text-base md:text-lg leading-relaxed">
+            2002. 38,400 miles. NISMO-spec. Full UK registration. <span class="text-bone">From £2.50 per ticket</span> — or enter free by post.
+          </p>
+
+          <div class="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+            <a href="#" data-inert class="cta text-xl px-8" style="height:60px;">ENTER NOW <i data-lucide="arrow-right" class="w-5 h-5"></i></a>
+            <a href="#" data-inert class="inline-flex items-center gap-2 text-bone hover:text-flame transition-colors text-sm">
+              <span class="w-9 h-9 rounded-full border border-bone/40 inline-flex items-center justify-center"><i data-lucide="play" class="w-4 h-4 ml-0.5"></i></span>
+              <span class="underline-offset-4 hover:underline">Watch the prize walk-around <span class="text-mute font-mono">(1:42)</span></span>
+            </a>
+          </div>
+
+          <p class="mt-4 text-[12px] text-mute">
+            <a href="#free-entry" class="hover:text-flame underline-offset-2 hover:underline">No purchase necessary. Enter free by post — same odds.</a>
+          </p>
+
+          <!-- Trust pellets -->
+          <div class="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-xl">
+            <div class="pellet"><i data-lucide="radio-tower" class="w-5 h-5 text-flame"></i><span class="label">LIVE DRAWS</span></div>
+            <div class="pellet"><i data-lucide="shield-check" class="w-5 h-5 text-flame"></i><span class="label">CASHFLOWS SECURED</span></div>
+            <div class="pellet"><span class="inline-flex items-center justify-center w-5 h-5 rounded-full border border-flame text-flame font-mono font-bold text-[10px]">18+</span><span class="label">AGE VERIFIED</span></div>
+            <div class="pellet"><i data-lucide="mail" class="w-5 h-5 text-flame"></i><span class="label">FREE POSTAL ENTRY</span></div>
+          </div>
+        </div>
+
+        <!-- Right: tachometer + ticket meta -->
+        <div class="md:col-span-5 lg:col-span-5 z-10 flex flex-col items-center md:items-end">
+          <div class="rounded-xl border border-steel/80 bg-carbon/70 backdrop-blur-md p-5 md:p-6 w-full max-w-[360px]">
+            <div class="flex items-center justify-between text-[11px] font-mono uppercase tracking-widest text-mute mb-2">
+              <span>Ticket sales</span><span class="text-flame">LIVE</span>
+            </div>
+            <!-- Hero gauge -->
+            <div class="flex justify-center">
+              <div class="gauge" data-gauge data-percent="73" data-size="hero" data-show-text="true"></div>
+            </div>
+            <div class="mt-1 grid grid-cols-2 gap-3 text-center">
+              <div>
+                <div class="font-mono text-[11px] uppercase tracking-widest text-mute">Price</div>
+                <div class="font-display text-2xl text-flame mt-0.5">£2.50</div>
+              </div>
+              <div>
+                <div class="font-mono text-[11px] uppercase tracking-widest text-mute">Closes in</div>
+                <div class="font-display text-2xl text-bone mt-0.5" data-countdown="hero">--D --H --M</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 7.4 TRUST STRIP ============ -->
+    <section aria-label="As covered by" class="bg-ink border-y border-steel">
+      <div class="max-w-[1280px] mx-auto px-4 py-6 md:py-8">
+        <p class="eyebrow text-center text-mute mb-4">AS COVERED BY</p>
+        <div class="flex flex-wrap items-center justify-center gap-x-8 md:gap-x-12 gap-y-3">
+          <span class="media-mark">TOP GEAR</span>
+          <span class="media-mark">PERFORMANCE CAR</span>
+          <span class="media-mark">GOODWOOD</span>
+          <span class="media-mark">CASTLE COMBE</span>
+          <span class="media-mark">CAR THROTTLE</span>
+          <span class="media-mark">EVO</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 7.5 STATS PANEL ============ -->
+    <section aria-label="Headline numbers" class="bg-carbon border-b border-steel">
+      <div class="max-w-[1280px] mx-auto px-4 py-8 md:py-10">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 text-center">
+          <div>
+            <div class="font-display stat-num text-flame" data-counter data-prefix="£" data-target="127400" data-suffix="+">£0+</div>
+            <div class="font-mono text-[11px] uppercase tracking-widest text-mute mt-2">Given away in prizes</div>
+          </div>
+          <div>
+            <div class="font-display stat-num text-flame" data-counter data-target="89">0</div>
+            <div class="font-mono text-[11px] uppercase tracking-widest text-mute mt-2">Real winners</div>
+          </div>
+          <div>
+            <div class="font-display stat-num text-flame" data-counter data-target="4200" data-suffix="+">0+</div>
+            <div class="font-mono text-[11px] uppercase tracking-widest text-mute mt-2">Members</div>
+          </div>
+          <div>
+            <div class="font-display stat-num text-flame">4.9<span class="text-bone/40">/5</span></div>
+            <div class="font-mono text-[11px] uppercase tracking-widest text-mute mt-2">1,247 Trustpilot reviews</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 7.6 CURRENTLY ON THE GRID ============ -->
+    <section id="grid" aria-label="Live competitions" class="py-14 md:py-20">
+      <div class="max-w-[1280px] mx-auto px-4">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-8">
+          <div>
+            <p class="eyebrow flex items-center gap-2"><span class="pulse-dot"></span>LIVE COMPETITIONS · 6 OPEN</p>
+            <h2 class="font-display text-4xl md:text-6xl uppercase mt-2">Currently on the Grid</h2>
+          </div>
+          <a href="#" data-inert class="text-flame text-sm font-mono uppercase tracking-widest hover:underline self-start md:self-auto">See all 14 →</a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+
+          <!-- Card 1: £10,000 CASH — INSTANT WIN -->
+          <article class="card">
+            <div class="relative aspect-[16/10] overflow-hidden bg-steel">
+              <img src="img/card-cash.png" alt="Stacked British fifty-pound notes with watch box and key fob" loading="lazy" class="w-full h-full object-cover" />
+              <div class="absolute top-3 left-3 flex flex-col gap-1.5 items-start">
+                <span class="chip chip-blue"><i data-lucide="zap" class="w-3 h-3"></i>INSTANT WIN</span>
+              </div>
+              <div class="absolute top-3 right-3 chip bg-black/70 backdrop-blur-sm text-bone">£1.00 / TICKET</div>
+            </div>
+            <div class="p-5">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-display text-xl md:text-2xl uppercase">£10,000 Tax-Free Cash</h3>
+                <div class="gauge shrink-0" data-gauge data-percent="41" data-size="mini"></div>
+              </div>
+              <p class="text-sm text-mute mt-2">Straight to your account. No fees, no tax. Pick your numbers, pick your luck.</p>
+              <div class="mt-4">
+                <div class="rev-bar" data-rev="41"><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div></div>
+                <div class="flex justify-between mt-2 text-[11px] font-mono">
+                  <span class="text-bone">41% sold</span>
+                  <span class="text-mute">8,236 / 20,000 tickets</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between mt-4">
+                <span class="font-mono text-sm text-bone" data-countdown="card1"><i data-lucide="timer" class="w-3.5 h-3.5 inline -mt-0.5"></i> --D --H --M</span>
+                <a href="#" data-inert class="cta-outline">ENTER</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 2: Sony FX6 Cinema Camera Kit -->
+          <article class="card">
+            <div class="relative aspect-[16/10] overflow-hidden bg-steel">
+              <img src="img/card-camera.png" alt="Professional cinema camera body with three prime lenses, monitor, cage and battery on charcoal concrete" loading="lazy" class="w-full h-full object-cover" />
+              <div class="absolute top-3 right-3 chip bg-black/70 backdrop-blur-sm text-bone">£4.99 / TICKET</div>
+            </div>
+            <div class="p-5">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-display text-xl md:text-2xl uppercase">Sony FX6 Cinema Kit</h3>
+                <div class="gauge shrink-0" data-gauge data-percent="28" data-size="mini"></div>
+              </div>
+              <p class="text-sm text-mute mt-2">Body, three primes, 7" monitor, full cage, V-mount battery. £14k retail. Plug in and shoot.</p>
+              <div class="mt-4">
+                <div class="rev-bar" data-rev="28"><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div></div>
+                <div class="flex justify-between mt-2 text-[11px] font-mono">
+                  <span class="text-bone">28% sold</span>
+                  <span class="text-mute">840 / 3,000 tickets</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between mt-4">
+                <span class="font-mono text-sm text-bone" data-countdown="card2"><i data-lucide="timer" class="w-3.5 h-3.5 inline -mt-0.5"></i> --D --H --M</span>
+                <a href="#" data-inert class="cta-outline">ENTER</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 3: Goodwood Track Day + Caterham — JUST LAUNCHED -->
+          <article class="card">
+            <div class="relative aspect-[16/10] overflow-hidden bg-steel">
+              <img src="img/card-trackday.png" alt="Orange Caterham-style roadster mid-corner at golden hour, motion blur in the background" loading="lazy" class="w-full h-full object-cover" />
+              <div class="absolute top-3 left-3 chip chip-flame bg-ink/70 backdrop-blur-sm"><i data-lucide="sparkles" class="w-3 h-3"></i>JUST LAUNCHED</div>
+              <div class="absolute top-3 right-3 chip bg-black/70 backdrop-blur-sm text-bone">£3.50 / TICKET</div>
+            </div>
+            <div class="p-5">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-display text-xl md:text-2xl uppercase">Goodwood + Caterham 420R</h3>
+                <div class="gauge shrink-0" data-gauge data-percent="12" data-size="mini"></div>
+              </div>
+              <p class="text-sm text-mute mt-2">Full day at Goodwood Motor Circuit. Caterham 420R, 24-hr loan, fuel included. Bring a helmet.</p>
+              <div class="mt-4">
+                <div class="rev-bar" data-rev="12"><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div></div>
+                <div class="flex justify-between mt-2 text-[11px] font-mono">
+                  <span class="text-bone">12% sold</span>
+                  <span class="text-mute">596 / 5,000 tickets</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between mt-4">
+                <span class="font-mono text-sm text-bone" data-countdown="card3"><i data-lucide="timer" class="w-3.5 h-3.5 inline -mt-0.5"></i> --D --H --M</span>
+                <a href="#" data-inert class="cta-outline">ENTER</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 4: Luxury Chronograph — CLOSING TODAY -->
+          <article class="card">
+            <div class="relative aspect-[16/10] overflow-hidden bg-steel">
+              <img src="img/card-watch.png" alt="Panda-dial steel chronograph wristwatch on dark slate, macro shot" loading="lazy" class="w-full h-full object-cover" />
+              <div class="absolute top-3 left-3 chip chip-red"><i data-lucide="timer" class="w-3 h-3"></i>CLOSING TODAY</div>
+              <div class="absolute top-3 right-3 chip bg-black/70 backdrop-blur-sm text-bone">£2.00 / TICKET</div>
+            </div>
+            <div class="p-5">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-display text-xl md:text-2xl uppercase">Luxury Steel Chronograph</h3>
+                <div class="gauge shrink-0" data-gauge data-percent="87" data-size="mini"></div>
+              </div>
+              <p class="text-sm text-mute mt-2">Panda dial, automatic movement, 40mm steel case. Unworn. Box and papers.</p>
+              <div class="mt-4">
+                <div class="rev-bar" data-rev="87"><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div></div>
+                <div class="flex justify-between mt-2 text-[11px] font-mono">
+                  <span class="text-redline">87% sold</span>
+                  <span class="text-mute">2,610 / 3,000 tickets</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between mt-4">
+                <span class="font-mono text-sm text-redline font-bold" data-countdown="card4"><i data-lucide="timer" class="w-3.5 h-3.5 inline -mt-0.5"></i> --H --M --S</span>
+                <a href="#" data-inert class="cta no-loop h-11 px-5 text-base">ENTER</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 5: HRE Forged Wheels -->
+          <article class="card">
+            <div class="relative aspect-[16/10] overflow-hidden bg-steel">
+              <img src="img/card-wheels.png" alt="Four bronze HRE-style forged multi-spoke wheels with yellow brake calipers" loading="lazy" class="w-full h-full object-cover" />
+              <div class="absolute top-3 right-3 chip bg-black/70 backdrop-blur-sm text-bone">£1.50 / TICKET</div>
+            </div>
+            <div class="p-5">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-display text-xl md:text-2xl uppercase">HRE Forged Wheels — 4 Set</h3>
+                <div class="gauge shrink-0" data-gauge data-percent="64" data-size="mini"></div>
+              </div>
+              <p class="text-sm text-mute mt-2">Bespoke 19" / 20" forged, custom-spec offset. Pick your fitment and finish. Worth £8,400.</p>
+              <div class="mt-4">
+                <div class="rev-bar" data-rev="64"><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div></div>
+                <div class="flex justify-between mt-2 text-[11px] font-mono">
+                  <span class="text-flame">64% sold</span>
+                  <span class="text-mute">3,840 / 6,000 tickets</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between mt-4">
+                <span class="font-mono text-sm text-bone" data-countdown="card5"><i data-lucide="timer" class="w-3.5 h-3.5 inline -mt-0.5"></i> --D --H --M</span>
+                <a href="#" data-inert class="cta-outline">ENTER</a>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 6: Snap-On Roller Cabinet -->
+          <article class="card">
+            <div class="relative aspect-[16/10] overflow-hidden bg-steel">
+              <img src="img/card-tools.png" alt="Glossy red Snap-On roller tool cabinet with chrome top, drawer open showing sockets, workshop in background" loading="lazy" class="w-full h-full object-cover" />
+              <div class="absolute top-3 right-3 chip bg-black/70 backdrop-blur-sm text-bone">£1.00 / TICKET</div>
+            </div>
+            <div class="p-5">
+              <div class="flex items-center justify-between gap-3">
+                <h3 class="font-display text-xl md:text-2xl uppercase">Snap-On Loaded Roller</h3>
+                <div class="gauge shrink-0" data-gauge data-percent="52" data-size="mini"></div>
+              </div>
+              <p class="text-sm text-mute mt-2">KRA-series 8-drawer cabinet, fully loaded with sockets, spanners and torque tools. £12k of kit.</p>
+              <div class="mt-4">
+                <div class="rev-bar" data-rev="52"><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div></div>
+                <div class="flex justify-between mt-2 text-[11px] font-mono">
+                  <span class="text-bone">52% sold</span>
+                  <span class="text-mute">5,200 / 10,000 tickets</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between mt-4">
+                <span class="font-mono text-sm text-bone" data-countdown="card6"><i data-lucide="timer" class="w-3.5 h-3.5 inline -mt-0.5"></i> --D --H --M</span>
+                <a href="#" data-inert class="cta-outline">ENTER</a>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 7.7 CLOSING TODAY ============ -->
+    <section aria-label="Closing today" class="bg-carbon border-y border-steel py-12">
+      <div class="max-w-[1280px] mx-auto px-4">
+        <div class="flex items-end justify-between mb-6">
+          <h2 class="font-display text-3xl md:text-5xl uppercase text-redline flex items-center gap-3">
+            <i data-lucide="timer" class="w-7 h-7 md:w-9 md:h-9"></i>
+            CLOSING TODAY
+          </h2>
+          <p class="font-mono text-xs uppercase tracking-widest text-mute hidden sm:block">3 tickets left in the danger zone</p>
+        </div>
+
+        <div class="hscroll snap-x">
+          <!-- Closing 1: Watch (87%) -->
+          <article class="card w-[300px] sm:w-[360px] relative">
+            <div class="relative aspect-[16/10] overflow-hidden">
+              <img src="img/card-watch.png" alt="Steel chronograph watch closing today" loading="lazy" class="w-full h-full object-cover" />
+              <div class="absolute top-3 left-3 chip chip-red">CLOSING NOW</div>
+              <div class="closing-overlay" data-countdown="closing1">--H --M --S</div>
+            </div>
+            <div class="p-4">
+              <h3 class="font-display text-lg uppercase">Luxury Steel Chronograph</h3>
+              <div class="rev-bar mt-3" data-rev="87"><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div></div>
+              <p class="text-[11px] font-mono text-redline mt-2">87% sold · 390 tickets left</p>
+            </div>
+          </article>
+
+          <!-- Closing 2: Apple silicon Mac Studio (mock) -->
+          <article class="card w-[300px] sm:w-[360px] relative">
+            <div class="relative aspect-[16/10] overflow-hidden bg-steel">
+              <img src="img/card-cash.png" alt="£5,000 cash bundle closing today" loading="lazy" class="w-full h-full object-cover" />
+              <div class="absolute top-3 left-3 chip chip-red">CLOSING NOW</div>
+              <div class="closing-overlay" data-countdown="closing2">--H --M --S</div>
+            </div>
+            <div class="p-4">
+              <h3 class="font-display text-lg uppercase">£5,000 Cash Drop</h3>
+              <div class="rev-bar mt-3" data-rev="91"><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div></div>
+              <p class="text-[11px] font-mono text-redline mt-2">91% sold · 720 tickets left</p>
+            </div>
+          </article>
+
+          <!-- Closing 3: Tools (78%) -->
+          <article class="card w-[300px] sm:w-[360px] relative">
+            <div class="relative aspect-[16/10] overflow-hidden">
+              <img src="img/card-tools.png" alt="Workshop tool cabinet closing today" loading="lazy" class="w-full h-full object-cover" />
+              <div class="absolute top-3 left-3 chip chip-red">CLOSING NOW</div>
+              <div class="closing-overlay" data-countdown="closing3">--H --M --S</div>
+            </div>
+            <div class="p-4">
+              <h3 class="font-display text-lg uppercase">Snap-On Side Cabinet</h3>
+              <div class="rev-bar mt-3" data-rev="78"><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div><div class="rev-seg"></div></div>
+              <p class="text-[11px] font-mono text-redline mt-2">78% sold · 1,100 tickets left</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 7.8 INSTANT WINS ============ -->
+    <section id="instant" aria-label="Instant wins" class="py-14 md:py-20">
+      <div class="max-w-[1280px] mx-auto px-4">
+        <div class="flex items-end justify-between mb-8">
+          <div>
+            <p class="eyebrow flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4"></i> NO DRAW · WIN INSTANTLY</p>
+            <h2 class="font-display text-4xl md:text-6xl uppercase mt-2">Instant Wins</h2>
+          </div>
+          <a href="#" data-inert class="text-flame text-sm font-mono uppercase tracking-widest hover:underline hidden md:inline">See all →</a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <article class="card p-5 relative overflow-hidden">
+            <span class="chip chip-red absolute top-4 right-4"><i data-lucide="zap" class="w-3 h-3"></i>INSTANT WIN</span>
+            <div class="inline-flex items-center gap-2 text-flame"><i data-lucide="banknote" class="w-5 h-5"></i></div>
+            <h3 class="font-display text-3xl uppercase mt-3">£500 in your account now</h3>
+            <p class="text-mute text-sm mt-2">Win in seconds — no draw. Hit a winning ticket and the cash hits your account in 60 minutes.</p>
+            <div class="flex items-center justify-between mt-5">
+              <div>
+                <div class="font-mono text-[11px] uppercase tracking-widest text-mute">From</div>
+                <div class="font-display text-2xl text-flame">£0.50</div>
+              </div>
+              <a href="#" data-inert class="cta no-loop h-11 px-6 text-base">PLAY</a>
+            </div>
+          </article>
+
+          <article class="card p-5 relative overflow-hidden">
+            <span class="chip chip-red absolute top-4 right-4"><i data-lucide="zap" class="w-3 h-3"></i>INSTANT WIN</span>
+            <div class="inline-flex items-center gap-2 text-flame"><i data-lucide="gamepad-2" class="w-5 h-5"></i></div>
+            <h3 class="font-display text-3xl uppercase mt-3">PS5 Pro Bundle</h3>
+            <p class="text-mute text-sm mt-2">Console, two pads, three latest titles. Boxed and on its way within 48 hours.</p>
+            <div class="flex items-center justify-between mt-5">
+              <div>
+                <div class="font-mono text-[11px] uppercase tracking-widest text-mute">From</div>
+                <div class="font-display text-2xl text-flame">£0.99</div>
+              </div>
+              <a href="#" data-inert class="cta no-loop h-11 px-6 text-base">PLAY</a>
+            </div>
+          </article>
+
+          <article class="card p-5 relative overflow-hidden">
+            <span class="chip chip-red absolute top-4 right-4"><i data-lucide="zap" class="w-3 h-3"></i>INSTANT WIN</span>
+            <div class="inline-flex items-center gap-2 text-flame"><i data-lucide="pound-sterling" class="w-5 h-5"></i></div>
+            <h3 class="font-display text-3xl uppercase mt-3">£250 Cash</h3>
+            <p class="text-mute text-sm mt-2">Smaller pot, faster odds. Top-up money in your account, no questions asked.</p>
+            <div class="flex items-center justify-between mt-5">
+              <div>
+                <div class="font-mono text-[11px] uppercase tracking-widest text-mute">From</div>
+                <div class="font-display text-2xl text-flame">£0.25</div>
+              </div>
+              <a href="#" data-inert class="cta no-loop h-11 px-6 text-base">PLAY</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 7.9 WINNERS ============ -->
+    <section id="winners" aria-label="Recent winners" class="bg-carbon border-y border-steel py-14 md:py-20">
+      <div class="max-w-[1280px] mx-auto px-4">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-8">
+          <div>
+            <p class="eyebrow">RECENT WINNERS · DRAWS STREAMED LIVE</p>
+            <h2 class="font-display text-4xl md:text-6xl uppercase mt-2">Won · Witnessed · Delivered</h2>
+          </div>
+          <a href="#" data-inert class="text-flame text-sm font-mono uppercase tracking-widest hover:underline self-start md:self-auto">See all 89 →</a>
+        </div>
+
+        <div class="hscroll md:overflow-visible md:grid md:grid-cols-4 md:gap-5 gap-4">
+          <!-- Winner 1 -->
+          <article class="card w-[260px] md:w-auto shrink-0">
+            <div class="aspect-square bg-gradient-to-br from-flame to-ember relative overflow-hidden">
+              <span class="absolute inset-0 grid place-items-center font-display text-7xl text-white/90 select-none">JM</span>
+              <div class="absolute bottom-3 left-3 chip bg-ink/80 text-bone">11 MAY</div>
+              <button class="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm grid place-items-center hover:bg-flame transition-colors" aria-label="Watch the draw" data-inert>
+                <i data-lucide="play" class="w-4 h-4 ml-0.5"></i>
+              </button>
+            </div>
+            <div class="p-4">
+              <p class="font-display text-xl uppercase">James M · Manchester</p>
+              <p class="text-flame font-mono text-xs mt-1">WON £5,000 CASH</p>
+              <p class="text-mute text-xs mt-1">Cash Drop · Comp #142</p>
+            </div>
+          </article>
+
+          <!-- Winner 2 -->
+          <article class="card w-[260px] md:w-auto shrink-0">
+            <div class="aspect-square bg-gradient-to-br from-steel to-ink relative overflow-hidden">
+              <span class="absolute inset-0 grid place-items-center font-display text-7xl text-flame/90 select-none">SR</span>
+              <div class="absolute bottom-3 left-3 chip bg-ink/80 text-bone">09 MAY</div>
+              <button class="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm grid place-items-center hover:bg-flame transition-colors" aria-label="Watch the draw" data-inert>
+                <i data-lucide="play" class="w-4 h-4 ml-0.5"></i>
+              </button>
+            </div>
+            <div class="p-4">
+              <p class="font-display text-xl uppercase">Sophie R · Leeds</p>
+              <p class="text-flame font-mono text-xs mt-1">WON 4× HRE WHEELS</p>
+              <p class="text-mute text-xs mt-1">Forged Set · Comp #138</p>
+            </div>
+          </article>
+
+          <!-- Winner 3 -->
+          <article class="card w-[260px] md:w-auto shrink-0">
+            <div class="aspect-square bg-gradient-to-br from-redline to-ember relative overflow-hidden">
+              <span class="absolute inset-0 grid place-items-center font-display text-7xl text-white/90 select-none">DT</span>
+              <div class="absolute bottom-3 left-3 chip bg-ink/80 text-bone">02 MAY</div>
+              <button class="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm grid place-items-center hover:bg-flame transition-colors" aria-label="Watch the draw" data-inert>
+                <i data-lucide="play" class="w-4 h-4 ml-0.5"></i>
+              </button>
+            </div>
+            <div class="p-4">
+              <p class="font-display text-xl uppercase">Daniel T · Bristol</p>
+              <p class="text-flame font-mono text-xs mt-1">WON BMW M2 COMPETITION</p>
+              <p class="text-mute text-xs mt-1">G87 · 2024 · Comp #131</p>
+            </div>
+          </article>
+
+          <!-- Winner 4 -->
+          <article class="card w-[260px] md:w-auto shrink-0">
+            <div class="aspect-square bg-gradient-to-br from-check to-steel relative overflow-hidden">
+              <span class="absolute inset-0 grid place-items-center font-display text-7xl text-white/90 select-none">PA</span>
+              <div class="absolute bottom-3 left-3 chip bg-ink/80 text-bone">25 APR</div>
+              <button class="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm grid place-items-center hover:bg-flame transition-colors" aria-label="Watch the draw" data-inert>
+                <i data-lucide="play" class="w-4 h-4 ml-0.5"></i>
+              </button>
+            </div>
+            <div class="p-4">
+              <p class="font-display text-xl uppercase">Priya A · Birmingham</p>
+              <p class="text-flame font-mono text-xs mt-1">WON SONY A7 IV KIT</p>
+              <p class="text-mute text-xs mt-1">Camera Bundle · Comp #126</p>
+            </div>
+          </article>
+        </div>
+
+        <!-- More winners -->
+        <div class="mt-8 flex items-center gap-4 flex-wrap">
+          <div class="flex -space-x-2">
+            <span class="avatar w-8 h-8 text-xs bg-flame/80">RM</span>
+            <span class="avatar w-8 h-8 text-xs bg-ember">LK</span>
+            <span class="avatar w-8 h-8 text-xs bg-steel-2">JC</span>
+            <span class="avatar w-8 h-8 text-xs bg-redline/80">TH</span>
+            <span class="avatar w-8 h-8 text-xs bg-check/70">EW</span>
+            <span class="avatar w-8 h-8 text-xs bg-flame-2">MK</span>
+            <span class="avatar w-8 h-8 text-xs bg-steel">SB</span>
+            <span class="avatar w-8 h-8 text-xs bg-flame/60">AN</span>
+          </div>
+          <a href="#" data-inert class="text-sm text-bone hover:text-flame">
+            <span class="font-mono">+ 89 more winners since launch</span>
+            <span class="text-flame underline-offset-2 hover:underline ml-2">See them all →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 7.10 HOW IT WORKS ============ -->
+    <section aria-label="How it works" class="py-14 md:py-20">
+      <div class="max-w-[1280px] mx-auto px-4">
+        <div class="text-center md:text-left mb-10">
+          <p class="eyebrow">FROM TICKET TO TROPHY</p>
+          <h2 class="font-display text-4xl md:text-6xl uppercase mt-2">How It Works</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="relative pt-2">
+            <div class="font-display text-[5rem] text-flame leading-none">01</div>
+            <h3 class="font-display text-2xl uppercase mt-2">Pick your prize</h3>
+            <p class="text-mute mt-2">Browse open competitions. Pick the prize you actually want. Choose how many entries — the more you buy, the better the odds.</p>
+            <i data-lucide="arrow-right" class="hidden md:block absolute top-9 -right-3 w-6 h-6 text-steel"></i>
+          </div>
+          <div class="relative pt-2">
+            <div class="font-display text-[5rem] text-flame leading-none">02</div>
+            <h3 class="font-display text-2xl uppercase mt-2">Answer the skill question</h3>
+            <p class="text-mute mt-2">One simple question — no fluff, no trick. <a href="#free-entry" class="text-bone underline-offset-2 underline hover:text-flame">Or enter free by post</a>. Same odds, same draw.</p>
+            <i data-lucide="arrow-right" class="hidden md:block absolute top-9 -right-3 w-6 h-6 text-steel"></i>
+          </div>
+          <div class="relative pt-2">
+            <div class="font-display text-[5rem] text-flame leading-none">03</div>
+            <h3 class="font-display text-2xl uppercase mt-2">Watch the live draw</h3>
+            <p class="text-mute mt-2">Every Friday at 7pm UK on YouTube. RNG output published before and after. Winners called immediately — prizes shipped the same week.</p>
+          </div>
+        </div>
+
+        <p id="free-entry" class="text-mute text-xs mt-10 max-w-2xl font-mono">
+          Section 339 compliant. Free postal entry on every competition — same odds as paid entries. <a href="#" data-inert class="text-flame hover:underline">Read the free entry route →</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ 7.11 BUILT DIFFERENT ============ -->
+    <section aria-label="Why us" class="bg-carbon border-y border-steel py-14 md:py-20">
+      <div class="max-w-[1280px] mx-auto px-4">
+        <div class="mb-10">
+          <p class="eyebrow">NOT YOUR USUAL COMP SITE</p>
+          <h2 class="font-display text-4xl md:text-6xl uppercase mt-2">Built Different</h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div class="card p-6">
+            <div class="w-12 h-12 rounded-lg bg-flame/15 border border-flame/30 grid place-items-center"><i data-lucide="target" class="w-5 h-5 text-flame"></i></div>
+            <h3 class="font-display text-xl uppercase mt-4">Provably fair draws</h3>
+            <p class="text-mute text-sm mt-2">Every draw streamed live on YouTube. RNG output published before and after — the maths is auditable, the result is not negotiable.</p>
+          </div>
+          <div class="card p-6">
+            <div class="w-12 h-12 rounded-lg bg-flame/15 border border-flame/30 grid place-items-center"><i data-lucide="car" class="w-5 h-5 text-flame"></i></div>
+            <h3 class="font-display text-xl uppercase mt-4">Backed by petrolheads</h3>
+            <p class="text-mute text-sm mt-2">Run by the team behind Flat-Out Media. Six years inside UK motorsport, tuner culture, and OEM film work — we pick prizes we'd want ourselves.</p>
+          </div>
+          <div class="card p-6">
+            <div class="w-12 h-12 rounded-lg bg-flame/15 border border-flame/30 grid place-items-center"><i data-lucide="mail" class="w-5 h-5 text-flame"></i></div>
+            <h3 class="font-display text-xl uppercase mt-4">Free to enter</h3>
+            <p class="text-mute text-sm mt-2">Every competition has a no-purchase postal route with the same odds as paid entries. Always linked from the page, never buried.</p>
+          </div>
+          <div class="card p-6">
+            <div class="w-12 h-12 rounded-lg bg-flame/15 border border-flame/30 grid place-items-center"><i data-lucide="shield-check" class="w-5 h-5 text-flame"></i></div>
+            <h3 class="font-display text-xl uppercase mt-4">Cashflows secured</h3>
+            <p class="text-mute text-sm mt-2">FCA-regulated payment processing via Cashflows. Your money lands in protected accounts — not on our balance sheet.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 7.12 BACKED BY FLAT-OUT MEDIA ============ -->
+    <section aria-label="Backed by Flat-Out Media" class="py-14 md:py-20">
+      <div class="max-w-[1280px] mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+        <div class="order-2 md:order-1">
+          <p class="eyebrow">BACKED BY FLAT-OUT MEDIA</p>
+          <h2 class="font-display text-4xl md:text-5xl lg:text-6xl uppercase mt-2 leading-[1.02]">
+            The comp site with a <span class="text-flame">pit crew</span>.
+          </h2>
+          <div class="text-bone/85 mt-5 space-y-3 text-base md:text-lg leading-relaxed">
+            <p>We are not a marketing agency that started doing comps.</p>
+            <p>We are a creative team that has spent six years on track-day Tuesdays and pit-lane Fridays — shooting OEM films, magazine features, and ad campaigns for some of the names you trust.</p>
+            <p>The team behind our films is the same team curating what we put up to win.</p>
+          </div>
+          <div class="flex flex-wrap gap-3 mt-6 text-xs font-mono uppercase tracking-widest text-mute">
+            <span class="px-3 py-1 border border-steel rounded-full">Ben Collins (ex-Stig)</span>
+            <span class="px-3 py-1 border border-steel rounded-full">Castle Combe Circuit</span>
+            <span class="px-3 py-1 border border-steel rounded-full">Goodwood</span>
+            <span class="px-3 py-1 border border-steel rounded-full">OEM Film Work</span>
+          </div>
+          <a href="https://flatoutmedia.org" target="_blank" rel="noopener" class="cta-outline mt-8 inline-flex">
+            See Flat-Out Media's work <i data-lucide="external-link" class="w-4 h-4"></i>
+          </a>
+        </div>
+        <div class="order-1 md:order-2">
+          <div class="relative rounded-xl overflow-hidden border border-steel">
+            <img src="img/parent-team.png" alt="Flat-Out Media film crew shooting an orange Caterham in a UK pit-lane garage" loading="lazy" class="w-full h-full object-cover aspect-[4/3]" />
+            <div class="absolute bottom-3 left-3 chip bg-ink/80 text-bone">FOM · CASTLE COMBE CIRCUIT</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ 7.13 FOOTER ============ -->
+  <footer class="bg-ink border-t border-steel pt-14 pb-8">
+    <div class="max-w-[1280px] mx-auto px-4">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-6">
+        <!-- Brand column -->
+        <div class="col-span-2">
+          <span class="bg-black inline-flex h-12 items-center px-1 rounded-sm">
+            <img class="logo-img h-11 w-auto" src="img/logo-foc.png" alt="Flat Out Competitions" />
+          </span>
+          <p class="font-display text-xl md:text-2xl mt-4 uppercase">Win like you live. <span class="text-flame">Flat out.</span></p>
+          <p class="text-mute text-sm mt-2 max-w-xs">Built by Flat-Out Media. Six years inside the UK car scene.</p>
+          <div class="grid grid-cols-2 gap-3 mt-6 max-w-xs">
+            <div>
+              <div class="font-display text-2xl text-flame">£127,400+</div>
+              <div class="font-mono text-[10px] uppercase tracking-widest text-mute">Prizes given</div>
+            </div>
+            <div>
+              <div class="font-display text-2xl text-flame">89</div>
+              <div class="font-mono text-[10px] uppercase tracking-widest text-mute">Real winners</div>
+            </div>
+            <div>
+              <div class="font-display text-2xl text-flame">4,200+</div>
+              <div class="font-mono text-[10px] uppercase tracking-widest text-mute">Members</div>
+            </div>
+            <div>
+              <div class="font-display text-2xl text-flame">4.9/5</div>
+              <div class="font-mono text-[10px] uppercase tracking-widest text-mute">1,247 reviews</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="font-display uppercase tracking-wider text-sm text-mute">Competitions</h3>
+          <ul class="mt-3 space-y-2 text-sm">
+            <li><a href="#" data-inert class="hover:text-flame">Cars</a></li>
+            <li><a href="#" data-inert class="hover:text-flame">Cash</a></li>
+            <li><a href="#" data-inert class="hover:text-flame">Tech &amp; Gear</a></li>
+            <li><a href="#" data-inert class="hover:text-flame">Watches</a></li>
+            <li><a href="#" data-inert class="hover:text-flame">Experiences</a></li>
+            <li><a href="#instant" class="hover:text-flame">Instant Wins</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-display uppercase tracking-wider text-sm text-mute">Info</h3>
+          <ul class="mt-3 space-y-2 text-sm">
+            <li><a href="#" data-inert class="hover:text-flame">How It Works</a></li>
+            <li><a href="#winners" class="hover:text-flame">Winners</a></li>
+            <li><a href="#" data-inert class="hover:text-flame">Live Draws</a></li>
+            <li><a href="#free-entry" class="hover:text-flame">Free Postal Entry <span class="text-mute font-mono text-[10px]">(s.339)</span></a></li>
+            <li><a href="#" data-inert class="hover:text-flame">FAQs</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-display uppercase tracking-wider text-sm text-mute">Legal</h3>
+          <ul class="mt-3 space-y-2 text-sm">
+            <li><a href="#" data-inert class="hover:text-flame">Terms &amp; Conditions</a></li>
+            <li><a href="#" data-inert class="hover:text-flame">Privacy</a></li>
+            <li><a href="#" data-inert class="hover:text-flame">Cookies</a></li>
+            <li><a href="#" data-inert class="hover:text-flame">Responsible Play</a></li>
+            <li><a href="#" data-inert class="hover:text-flame">Complaints</a></li>
+          </ul>
+        </div>
+
+        <div class="col-span-2 md:col-span-1">
+          <h3 class="font-display uppercase tracking-wider text-sm text-mute">Contact</h3>
+          <ul class="mt-3 space-y-2 text-sm">
+            <li><a href="mailto:hello@flatoutcompetitions.co.uk" class="hover:text-flame">hello@flatoutcompetitions.co.uk</a></li>
+            <li class="text-mute">Support: Mon–Fri 9am–6pm UK</li>
+          </ul>
+          <div class="flex gap-3 mt-4">
+            <a href="#" data-inert aria-label="Instagram" class="w-9 h-9 grid place-items-center border border-steel rounded hover:border-flame hover:text-flame transition-colors"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+            <a href="#" data-inert aria-label="YouTube" class="w-9 h-9 grid place-items-center border border-steel rounded hover:border-flame hover:text-flame transition-colors"><i data-lucide="youtube" class="w-4 h-4"></i></a>
+            <a href="#" data-inert aria-label="TikTok" class="w-9 h-9 grid place-items-center border border-steel rounded hover:border-flame hover:text-flame transition-colors"><i data-lucide="music-2" class="w-4 h-4"></i></a>
+            <a href="#" data-inert aria-label="Facebook" class="w-9 h-9 grid place-items-center border border-steel rounded hover:border-flame hover:text-flame transition-colors"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+            <a href="#" data-inert aria-label="X" class="w-9 h-9 grid place-items-center border border-steel rounded hover:border-flame hover:text-flame transition-colors"><i data-lucide="twitter" class="w-4 h-4"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trust row -->
+      <div class="mt-12 pt-6 border-t border-steel flex flex-wrap items-center justify-between gap-5">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="px-3 py-1.5 bg-white text-ink font-display text-sm rounded">VISA</span>
+          <span class="px-3 py-1.5 bg-white text-ink font-display text-sm rounded">MASTERCARD</span>
+          <span class="px-3 py-1.5 bg-white text-ink font-display text-sm rounded inline-flex items-center gap-1"><i data-lucide="apple" class="w-3.5 h-3.5"></i>PAY</span>
+          <span class="px-3 py-1.5 bg-white text-ink font-display text-sm rounded">G PAY</span>
+          <span class="px-3 py-1.5 bg-white text-ink font-display text-sm rounded">PAYPAL</span>
+          <span class="px-3 py-1.5 border border-steel font-mono text-xs text-mute rounded">CASHFLOWS · FCA REG</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="inline-flex items-center justify-center w-10 h-10 rounded-full border-2 border-flame text-flame font-display text-base">18+</span>
+          <div class="flex items-center gap-2 tp-stars">
+            <svg width="60" height="12" viewBox="0 0 76 14" aria-hidden="true">
+              <rect x="0"  y="0" width="14" height="14" fill="#00B67A"/><rect x="15" y="0" width="14" height="14" fill="#00B67A"/><rect x="30" y="0" width="14" height="14" fill="#00B67A"/><rect x="45" y="0" width="14" height="14" fill="#00B67A"/><rect x="60" y="0" width="14" height="14" fill="#00B67A"/>
+              <polygon points="7,2 8.4,5.6 12.3,5.6 9.2,7.9 10.4,11.5 7,9.3 3.6,11.5 4.8,7.9 1.7,5.6 5.6,5.6" fill="#fff"/>
+              <polygon points="22,2 23.4,5.6 27.3,5.6 24.2,7.9 25.4,11.5 22,9.3 18.6,11.5 19.8,7.9 16.7,5.6 20.6,5.6" fill="#fff"/>
+              <polygon points="37,2 38.4,5.6 42.3,5.6 39.2,7.9 40.4,11.5 37,9.3 33.6,11.5 34.8,7.9 31.7,5.6 35.6,5.6" fill="#fff"/>
+              <polygon points="52,2 53.4,5.6 57.3,5.6 54.2,7.9 55.4,11.5 52,9.3 48.6,11.5 49.8,7.9 46.7,5.6 50.6,5.6" fill="#fff"/>
+              <polygon points="67,2 68.4,5.6 72.3,5.6 69.2,7.9 70.4,11.5 67,9.3 63.6,11.5 64.8,7.9 61.7,5.6 65.6,5.6" fill="#fff"/>
+            </svg>
+            <span class="font-mono text-xs text-bone">4.9 · 1,247 reviews</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom legal line -->
+      <p class="text-mute text-xs mt-6 leading-relaxed">
+        © 2026 Flat Out Competitions Ltd · Company No. 14982361 · Registered in England &amp; Wales · Flat Out Competitions is part of the Flat-Out Media group. <br class="hidden md:block" />
+        18+ only. Please play responsibly. Visit
+        <a href="https://www.begambleaware.org" target="_blank" rel="noopener" class="text-bone underline-offset-2 underline hover:text-flame">BeGambleAware.org</a>
+        for support and information.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite">Mockup only — form disabled</div>
+
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    // ----------- Lucide init -----------
+    if (window.lucide) window.lucide.createIcons();
+
+    // ----------- Inert CTAs / Toast -----------
+    const toast = document.getElementById('toast');
+    let toastT;
+    function showToast(){
+      toast.classList.add('show');
+      clearTimeout(toastT);
+      toastT = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+    document.querySelectorAll('[data-inert]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        showToast();
+      });
+    });
+    document.querySelectorAll('form').forEach(f => f.addEventListener('submit', e => { e.preventDefault(); showToast(); }));
+
+    // ----------- Sticky nav scroll state -----------
+    const nav = document.querySelector('.nav-sticky');
+    const onScroll = () => {
+      if (window.scrollY > 80) nav.classList.add('scrolled');
+      else nav.classList.remove('scrolled');
+    };
+    window.addEventListener('scroll', onScroll, {passive:true});
+    onScroll();
+
+    // ----------- Mobile menu -----------
+    const menu = document.getElementById('mobile-menu');
+    const menuBtn = document.getElementById('menu-btn');
+    const menuClose = document.getElementById('menu-close');
+    const menuBackdrop = document.getElementById('menu-backdrop');
+    function openMenu(){ menu.classList.add('open'); menu.setAttribute('aria-hidden','false'); menuBtn.setAttribute('aria-expanded','true'); menuBackdrop.classList.remove('hidden'); document.body.style.overflow='hidden'; }
+    function closeMenu(){ menu.classList.remove('open'); menu.setAttribute('aria-hidden','true'); menuBtn.setAttribute('aria-expanded','false'); menuBackdrop.classList.add('hidden'); document.body.style.overflow=''; }
+    menuBtn?.addEventListener('click', openMenu);
+    menuClose?.addEventListener('click', closeMenu);
+    menuBackdrop?.addEventListener('click', closeMenu);
+    menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+
+    // ----------- Tachometer gauges -----------
+    // Geometry: 0° at 12 o'clock, clockwise positive. Sweep -110° to +110° (220°).
+    const GAUGE = {
+      hero: {
+        size:240, cx:120, cy:120, arcR:90,
+        tickInnerMinor:78, tickOuterMinor:86,
+        tickInnerMajor:74, tickOuterMajor:90,
+        labelR:62, needleLen:78, needleWidth:5, capR:7,
+        font:11, showText:true
+      },
+      mini: {
+        size:56, cx:28, cy:28, arcR:21,
+        tickInnerMinor:18, tickOuterMinor:20,
+        tickInnerMajor:16, tickOuterMajor:21,
+        labelR:0, needleLen:18, needleWidth:2.4, capR:3,
+        font:0, showText:false, showLabels:false
+      }
+    };
+    const START = -110, END = 110, SWEEP = END - START;
+
+    function ptAt(cx, cy, r, deg){
+      const a = deg * Math.PI / 180;
+      return { x: cx + r * Math.sin(a), y: cy - r * Math.cos(a) };
+    }
+    function arcPath(cx, cy, r, a1, a2){
+      const p1 = ptAt(cx, cy, r, a1);
+      const p2 = ptAt(cx, cy, r, a2);
+      const largeArc = Math.abs(a2 - a1) > 180 ? 1 : 0;
+      const sweepFlag = a2 > a1 ? 1 : 0;
+      return `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} A ${r} ${r} 0 ${largeArc} ${sweepFlag} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`;
+    }
+
+    function renderGauge(el){
+      const percent = Math.max(0, Math.min(100, parseFloat(el.dataset.percent || '0')));
+      const cfg = GAUGE[el.dataset.size || 'hero'];
+      const isHero = el.dataset.size === 'hero';
+      const id = 'g' + Math.random().toString(36).slice(2, 9);
+
+      // Build ticks
+      let ticksHTML = '';
+      for (let i = 0; i <= 10; i++){
+        const t = i / 10;
+        const ang = START + SWEEP * t;
+        const inner = ptAt(cfg.cx, cfg.cy, cfg.tickInnerMinor, ang);
+        const outer = ptAt(cfg.cx, cfg.cy, cfg.tickOuterMinor, ang);
+        const isEnd = (i === 0 || i === 10);
+        const stroke = isEnd ? '#F5F2EC' : '#5b5f66';
+        const sw = isEnd ? 1.6 : 1;
+        ticksHTML += `<line x1="${inner.x.toFixed(2)}" y1="${inner.y.toFixed(2)}" x2="${outer.x.toFixed(2)}" y2="${outer.y.toFixed(2)}" stroke="${stroke}" stroke-width="${sw}" stroke-linecap="round"/>`;
+      }
+      // Major ticks at 25 and 75
+      if (cfg.showLabels !== false){
+        [0.25, 0.5, 0.75].forEach(t => {
+          const ang = START + SWEEP * t;
+          const inner = ptAt(cfg.cx, cfg.cy, cfg.tickInnerMajor, ang);
+          const outer = ptAt(cfg.cx, cfg.cy, cfg.tickOuterMajor, ang);
+          ticksHTML += `<line x1="${inner.x.toFixed(2)}" y1="${inner.y.toFixed(2)}" x2="${outer.x.toFixed(2)}" y2="${outer.y.toFixed(2)}" stroke="#F5F2EC" stroke-width="1.4" stroke-linecap="round"/>`;
+        });
+      }
+
+      // Labels at 0,25,50,75,100
+      let labelsHTML = '';
+      if (cfg.showLabels !== false && cfg.font){
+        [0, 25, 50, 75, 100].forEach(p => {
+          const ang = START + SWEEP * (p / 100);
+          const pt = ptAt(cfg.cx, cfg.cy, cfg.labelR, ang);
+          labelsHTML += `<text x="${pt.x.toFixed(2)}" y="${pt.y.toFixed(2)}" font-family="JetBrains Mono,monospace" font-size="${cfg.font}" font-weight="700" fill="#9CA0A6" text-anchor="middle" dominant-baseline="central">${p}</text>`;
+        });
+      }
+
+      // Arc geometry — compute total arc length for stroke-dasharray
+      const radius = cfg.arcR;
+      const arcLengthFull = (SWEEP * Math.PI / 180) * radius; // length in user units
+      // Gradient endpoints — derive from arc start/end x
+      const gStart = ptAt(cfg.cx, cfg.cy, radius, START);
+      const gEnd   = ptAt(cfg.cx, cfg.cy, radius, END);
+
+      // Needle angle for target percent
+      const needleAngle = START + SWEEP * (percent / 100);
+
+      // Centre text
+      let centerHTML = '';
+      if (cfg.showText){
+        centerHTML = `
+          <text x="${cfg.cx}" y="${cfg.cy + 18}" font-family="Anton,Impact,sans-serif" font-size="42" fill="#F5F2EC" text-anchor="middle" dominant-baseline="middle" letter-spacing="-0.5"><tspan data-gauge-num>0</tspan>%</text>
+          <text x="${cfg.cx}" y="${cfg.cy + 42}" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#9CA0A6" text-anchor="middle" letter-spacing="2.5">SOLD</text>
+          <text x="${cfg.cx}" y="${cfg.cy + 60}" font-family="JetBrains Mono,monospace" font-size="9" fill="#9CA0A6" text-anchor="middle"><tspan data-gauge-frac>0</tspan> / <tspan data-gauge-tot>0</tspan> tickets</text>
+        `;
+      }
+
+      el.innerHTML = `
+        <svg width="${cfg.size}" height="${cfg.size}" viewBox="0 0 ${cfg.size} ${cfg.size}" role="img" aria-label="${percent}% sold">
+          <defs>
+            <linearGradient id="${id}-grad" x1="${gStart.x}" y1="${gStart.y}" x2="${gEnd.x}" y2="${gEnd.y}" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#F5F2EC"/>
+              <stop offset="50%" stop-color="#F26A1F"/>
+              <stop offset="100%" stop-color="#E33A28"/>
+            </linearGradient>
+            <radialGradient id="${id}-cap" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#fff"/>
+              <stop offset="70%" stop-color="#f0f0f0"/>
+              <stop offset="100%" stop-color="#8a8a8a"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Track arc -->
+          <path d="${arcPath(cfg.cx, cfg.cy, radius, START, END)}" fill="none" stroke="#23252a" stroke-width="${isHero ? 8 : 4}" stroke-linecap="round"/>
+          <!-- Progress arc -->
+          <path class="progress-arc" d="${arcPath(cfg.cx, cfg.cy, radius, START, END)}" fill="none" stroke="url(#${id}-grad)" stroke-width="${isHero ? 8 : 4}" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" data-target="${percent}"/>
+
+          <!-- Ticks -->
+          ${ticksHTML}
+          <!-- Labels -->
+          ${labelsHTML}
+
+          <!-- Needle group (rotated about gauge centre) -->
+          <g class="needle-grp" style="transform: rotate(${START}deg); transform-origin: ${cfg.cx}px ${cfg.cy}px;" data-target-rotate="${needleAngle}">
+            <!-- Base shadow -->
+            <line x1="${cfg.cx}" y1="${cfg.cy}" x2="${cfg.cx}" y2="${cfg.cy - cfg.needleLen * 0.6}" stroke="#E33A28" stroke-width="${cfg.needleWidth}" stroke-linecap="round"/>
+            <!-- Tip -->
+            <line x1="${cfg.cx}" y1="${cfg.cy - cfg.needleLen * 0.55}" x2="${cfg.cx}" y2="${cfg.cy - cfg.needleLen}" stroke="#F26A1F" stroke-width="${cfg.needleWidth * 0.6}" stroke-linecap="round"/>
+          </g>
+          <!-- Pivot cap -->
+          <circle cx="${cfg.cx}" cy="${cfg.cy}" r="${cfg.capR}" fill="#1b1d20" stroke="#5b5f66" stroke-width="1"/>
+          <circle cx="${cfg.cx}" cy="${cfg.cy}" r="${cfg.capR * 0.45}" fill="url(#${id}-cap)"/>
+
+          ${centerHTML}
+        </svg>
+      `;
+
+      // Save target on element for animation
+      el.dataset.target = percent;
+    }
+
+    function animateGauge(el){
+      if (el.dataset.animated === 'true') return;
+      el.dataset.animated = 'true';
+
+      const target = parseFloat(el.dataset.target || '0');
+      const progressArc = el.querySelector('.progress-arc');
+      const needleGrp = el.querySelector('.needle-grp');
+
+      // Trigger CSS transitions
+      requestAnimationFrame(() => {
+        if (progressArc) progressArc.setAttribute('stroke-dasharray', `${target} 100`);
+        if (needleGrp){
+          const rot = parseFloat(needleGrp.dataset.targetRotate);
+          needleGrp.style.transform = `rotate(${rot}deg)`;
+        }
+      });
+
+      // Animate centre text
+      const numEl = el.querySelector('[data-gauge-num]');
+      const fracEl = el.querySelector('[data-gauge-frac]');
+      const totEl = el.querySelector('[data-gauge-tot]');
+      if (numEl){
+        const total = 10000;
+        const dur = 1200;
+        const start = performance.now();
+        function tick(now){
+          const t = Math.min(1, (now - start) / dur);
+          const eased = 1 - Math.pow(1 - t, 3);
+          const cur = target * eased;
+          numEl.textContent = Math.round(cur);
+          if (fracEl) fracEl.textContent = Math.round(total * cur / 100).toLocaleString('en-GB');
+          if (totEl) totEl.textContent = total.toLocaleString('en-GB');
+          if (t < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+    }
+
+    // Initial render
+    document.querySelectorAll('[data-gauge]').forEach(el => renderGauge(el));
+
+    // ----------- IntersectionObserver to animate gauges, rev-bars, counters -----------
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+
+        // Gauges
+        if (el.matches('[data-gauge]')) animateGauge(el);
+
+        // Rev bars
+        if (el.matches('.rev-bar')){
+          const pct = parseInt(el.dataset.rev, 10);
+          const segs = el.querySelectorAll('.rev-seg');
+          el.classList.add('filled');
+          const filledCount = Math.round(pct / 10);
+          segs.forEach((s, i) => {
+            if (i < filledCount){
+              // Determine colour band: bone (0-30), flame-2 (30-60), flame (60-85), redline (85-100)
+              const segPct = (i + 1) * 10;
+              let cls = 'on-1';
+              if (segPct > 30) cls = 'on-2';
+              if (segPct > 60) cls = 'on-3';
+              if (segPct > 85) cls = 'on-4';
+              setTimeout(() => s.classList.add(cls), i * 60);
+            }
+          });
+        }
+
+        // Counters
+        if (el.matches('[data-counter]')){
+          const target = parseFloat(el.dataset.target);
+          const prefix = el.dataset.prefix || '';
+          const suffix = el.dataset.suffix || '';
+          const dur = 1400;
+          const start = performance.now();
+          function tick(now){
+            const t = Math.min(1, (now - start) / dur);
+            const eased = 1 - Math.pow(1 - t, 3);
+            const cur = target * eased;
+            el.textContent = prefix + Math.round(cur).toLocaleString('en-GB') + suffix;
+            if (t < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+        }
+
+        io.unobserve(el);
+      });
+    }, { threshold: 0.25 });
+
+    document.querySelectorAll('[data-gauge], .rev-bar, [data-counter]').forEach(el => io.observe(el));
+
+    // ----------- Countdowns -----------
+    // Pick end times spread across 1–11 days from now
+    const now = new Date();
+    function daysFromNow(days, hourLocal=21, minuteLocal=0){
+      const d = new Date(now);
+      d.setDate(d.getDate() + days);
+      d.setHours(hourLocal, minuteLocal, 0, 0);
+      return d;
+    }
+    function hoursFromNow(hours){
+      const d = new Date(now);
+      d.setHours(d.getHours() + hours, 0, 0, 0);
+      return d;
+    }
+
+    // Pick the next Tuesday at 21:00 for the hero — but if it's <12 hours away, push a week
+    function nextTuesday(){
+      const d = new Date(now);
+      const day = d.getDay(); // 0 Sun ... 2 Tue
+      let delta = (2 - day + 7) % 7;
+      if (delta === 0) delta = 7; // always future
+      d.setDate(d.getDate() + delta);
+      d.setHours(21, 0, 0, 0);
+      return d;
+    }
+
+    const endTimes = {
+      hero:     nextTuesday(),
+      card1:    daysFromNow(4, 21, 0),                  // £10k cash · 4D
+      card2:    daysFromNow(9, 21, 0),                  // Cinema kit · 9D
+      card3:    daysFromNow(11, 21, 0),                 // Goodwood/Caterham · 11D
+      card4:    hoursFromNow(6),                        // Watch · closing today 6H
+      card5:    daysFromNow(3, 21, 0),                  // Wheels · 3D
+      card6:    daysFromNow(6, 21, 0),                  // Tools · 6D
+      closing1: hoursFromNow(6),                        // mirrors card4
+      closing2: hoursFromNow(2),                        // cash drop 2H
+      closing3: hoursFromNow(11),                       // tools mini 11H
+    };
+
+    function fmt(n, p = 2){ return String(n).padStart(p, '0'); }
+    function updateCountdowns(){
+      const t = Date.now();
+      document.querySelectorAll('[data-countdown]').forEach(el => {
+        const key = el.dataset.countdown;
+        const end = endTimes[key];
+        if (!end) return;
+        let diff = Math.max(0, end.getTime() - t);
+        const days = Math.floor(diff / 86400000); diff -= days * 86400000;
+        const hours = Math.floor(diff / 3600000); diff -= hours * 3600000;
+        const mins = Math.floor(diff / 60000); diff -= mins * 60000;
+        const secs = Math.floor(diff / 1000);
+
+        // Decide format
+        const showDays = !/closing/.test(key) && key !== 'card4';
+        const showSecs = /closing/.test(key) || key === 'card4';
+
+        // Icon prefix: Lucide replaces <i data-lucide> with <svg>, so query for either.
+        const iconHTML = (el.querySelector('i, svg')?.outerHTML) || '';
+        let text;
+        if (showDays) text = `${days}D ${fmt(hours)}H ${fmt(mins)}M`;
+        else text = `${fmt(hours)}H ${fmt(mins)}M ${fmt(secs)}S`;
+        el.innerHTML = (iconHTML ? iconHTML + ' ' : '') + text;
+      });
+
+      // Hero label — show "Tuesday 21:00" verbatim. Already in DOM. No change needed.
+    }
+    updateCountdowns();
+    setInterval(updateCountdowns, 1000);
+
+    // ----------- Re-init Lucide after dynamic insertions (countdowns) -----------
+    // (Icons are baked once; countdown text-only updates don't strip them, so no re-init needed.)
+  </script>
+</body>
+</html>

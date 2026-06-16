@@ -7,6 +7,12 @@ Thumbs.db
 
 # Claude local dev config (preview server etc.)
 .claude/
+# ...but track installed skills and agents (e.g. the SEO skill)
+!.claude/
+!.claude/skills/
+!.claude/skills/**
+!.claude/agents/
+!.claude/agents/**
 
 # Local server output
 *.log

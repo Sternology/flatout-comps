@@ -16,3 +16,7 @@ Thumbs.db
 
 # Local server output
 *.log
+
+# Python bytecode (e.g. from SEO skill scripts)
+__pycache__/
+*.pyc
